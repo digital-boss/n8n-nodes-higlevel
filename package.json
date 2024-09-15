@@ -1,7 +1,7 @@
 {
   "name": "@digital-boss/n8n-nodes-highlevel",
   "version": "0.1.0",
-  "description": "",
+  "description": " n8n node to automate the authorization and capture of payment information for externally billed apps in marketplace.",
   "keywords": [
     "n8n-community-node-package"
   ],
