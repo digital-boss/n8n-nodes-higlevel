@@ -2,13 +2,26 @@ import type { ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class HighLevelOAuth2Api implements ICredentialType {
 	name = 'highLevelOAuth2Api';
-
 	extends = ['oAuth2Api'];
-
 	displayName = 'HighLevel OAuth2 API';
 	documentationUrl = 'https://highlevel.stoplight.io/';
 
 	properties: INodeProperties[] = [
+		{
+			displayName: 'Client ID',
+			name: 'clientId',
+			type: 'string',
+			default: '',
+			required: true,
+		},
+		{
+			displayName: 'Client Secret',
+			name: 'clientSecret',
+			type: 'string',
+			default: '',
+			typeOptions: { password: true },
+			required: true,
+		},
 		{
 			displayName: 'Grant Type',
 			name: 'grantType',
@@ -59,4 +72,11 @@ export class HighLevelOAuth2Api implements ICredentialType {
 			default: 'body',
 		},
 	];
+
+	// Add a method to dynamically generate the redirect URL
+	getRedirectUrl(): string {
+		// @ts-ignore
+		const baseUrl = process.env.N8N_BASE_URL || 'http://localhost:5678';
+		return `${baseUrl}/rest/oauth2-credential/callback`;
+	}
 }
