@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@types/luxon':
-        specifier: ^3.4.2
-        version: 3.4.2
       '@typescript-eslint/parser':
         specifier: ^7.15.0
         version: 7.15.0(eslint@8.57.0)(typescript@5.5.3)
@@ -90,9 +87,6 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
-
-  '@types/luxon@3.4.2':
-    resolution: {integrity: sha512-TifLZlFudklWlMBfhubvgqTXRzLDI5pCbGa4P8a3wPyUQSW+1xQ5eDsreP9DWHX3tjq1ke96uYG/nwundroWcA==, tarball: https://registry.npmjs.org/@types/luxon/-/luxon-3.4.2.tgz}
 
   '@types/semver@7.5.8':
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
@@ -2078,8 +2072,6 @@ snapshots:
       fastq: 1.13.0
 
   '@types/json-schema@7.0.15': {}
-
-  '@types/luxon@3.4.2': {}
 
   '@types/semver@7.5.8': {}
 

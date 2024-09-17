@@ -15,8 +15,9 @@ import type {
 	IWebhookFunctions,
 } from 'n8n-workflow';
 import { ApplicationError, NodeApiError } from 'n8n-workflow';
-
+//@ts-ignore
 import type { ToISOTimeOptions } from 'luxon';
+//@ts-ignore
 import { DateTime } from 'luxon';
 
 const VALID_EMAIL_REGEX =
