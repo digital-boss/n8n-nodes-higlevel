@@ -1,32 +1,29 @@
-import type { ICredentialType, INodeProperties, IAuthenticateGeneric, ICredentialTestRequest } from 'n8n-workflow';
+import type { ICredentialType, INodeProperties, IAuthenticateGeneric, ICredentialTestRequest, Icon } from 'n8n-workflow';
 
 export class HighLevelOAuth2Api implements ICredentialType {
 	name = 'highLevelOAuth2Api';
 	extends = ['oAuth2Api'];
 	displayName = 'HighLevel OAuth2 API';
 	documentationUrl = 'https://highlevel.stoplight.io/';
+	icon: Icon = 'file:icons/highLevel.svg';
 
 	properties: INodeProperties[] = [
 		{
-			displayName: 'Client ID',
-			name: 'clientId',
-			type: 'string',
-			default: '',
-			required: true,
-		},
-		{
-			displayName: 'Client Secret',
-			name: 'clientSecret',
-			type: 'string',
-			default: '',
-			typeOptions: { password: true },
-			required: true,
-		},
-		{
 			displayName: 'Grant Type',
 			name: 'grantType',
-			type: 'hidden',
+			type: 'options',
+			options: [
+				{
+					name: 'Authorization Code',
+					value: 'authorizationCode',
+				},
+				{
+					name: 'Client Credentials',
+					value: 'clientCredentials',
+				},
+			],
 			default: 'authorizationCode',
+			required: true,
 		},
 		{
 			displayName: 'Authorization URL',
@@ -34,6 +31,11 @@ export class HighLevelOAuth2Api implements ICredentialType {
 			type: 'options',
 			default: 'https://marketplace.leadconnectorhq.com/oauth/chooselocation',
 			required: true,
+			displayOptions: {
+				show: {
+					grantType: ['authorizationCode'],
+				},
+			},
 			options: [
 				{
 					name: 'White-Label',
@@ -46,18 +48,74 @@ export class HighLevelOAuth2Api implements ICredentialType {
 			],
 		},
 		{
+			displayName: 'Access Token URL',
+			name: 'accessTokenUrl',
+			type: 'string',
+			default: 'https://services.leadconnectorhq.com/oauth/token',
+			required: true,
+			displayOptions: {
+				show: {
+					grantType: ['authorizationCode', 'clientCredentials'],
+				},
+			},
+		},
+		{
+			displayName: 'Client ID',
+			name: 'clientId',
+			type: 'string',
+			default: '',
+			required: true,
+			displayOptions: {
+				show: {
+					grantType: ['clientCredentials'],
+				},
+			},
+		},
+		{
+			displayName: 'Client Secret',
+			name: 'clientSecret',
+			type: 'string',
+			default: '',
+			typeOptions: { password: true },
+			required: true,
+			displayOptions: {
+				show: {
+					grantType: ['clientCredentials'],
+				},
+			},
+		},
+		{
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'string',
-			hint: "Separate scopes by space, scopes needed for node: 'locations.readonly contacts.readonly contacts.write opportunities.readonly opportunities.write users.readonly'",
+			hint: 'Separate scopes by space, if needed.',
 			default: '',
-			required: true,
+			displayOptions: {
+				show: {
+					grantType: ['clientCredentials'],
+				},
+			},
 		},
 		{
-			displayName: 'Access Token URL',
-			name: 'accessTokenUrl',
-			type: 'hidden',
-			default: 'https://services.leadconnectorhq.com/oauth/token',
+			displayName: 'Authentication Type',
+			name: 'authentication',
+			type: 'options',
+			options: [
+				{
+					name: 'Header',
+					value: 'header',
+				},
+				{
+					name: 'Body',
+					value: 'body',
+				},
+			],
+			default: 'body',
+			displayOptions: {
+				show: {
+					grantType: ['clientCredentials'],
+				},
+			},
 		},
 		{
 			displayName: 'Auth URI Query Parameters',
@@ -65,57 +123,26 @@ export class HighLevelOAuth2Api implements ICredentialType {
 			type: 'hidden',
 			default: '',
 		},
-		{
-			displayName: 'Authentication',
-			name: 'authentication',
-			type: 'hidden',
-			default: 'body',
-		},
-		{
-			displayName: 'OAuth Redirect URL',
-			name: 'redirectUrl',
-			type: 'string',
-			default: '',
-			description: 'The URL where the authorization response will be sent.',
-			//@ts-ignore
-			readOnly: true,
-			displayOptions: {
-				show: {
-					grantType: ['authorizationCode'],
-				},
-			},
-		},
 	];
-
-	getRedirectUrl(): string {
-		//@ts-ignore
-		const baseUrl = process.env.N8N_BASE_URL || 'http://localhost:5678';
-		return `${baseUrl}/rest/oauth2-credential/callback`;
-	}
-
-	async getCredentials(): Promise<{ [key: string]: any }> {
-		const redirectUrl = this.getRedirectUrl();
-		return {
-			redirectUrl,
-		};
-	}
 
 	authenticate: IAuthenticateGeneric = {
 		type: 'generic',
 		properties: {
+			//@ts-ignore
+			header: {
+				Authorization: '={{$credentials.clientId}}',
+			},
 			body: {
 				client_id: '={{$credentials.clientId}}',
 				client_secret: '={{$credentials.clientSecret}}',
-				redirect_uri: '={{$credentials.redirectUrl}}',
 			},
 		},
 	};
 
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: 'https://api.gohighlevel.com',
-			url: '/oauth/test',
-			method: 'GET',
+			baseURL: '={{$credentials?.accessTokenUrl}}',
+			url: '/test',
 		},
 	};
 }
