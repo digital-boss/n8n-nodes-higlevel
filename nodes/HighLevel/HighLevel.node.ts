@@ -21,7 +21,7 @@ export class HighLevel implements INodeType {
 		outputs: ['main'],
 		credentials: [
 			{
-				name: 'highLevelApi',
+				name: 'highLevelOAuth2Api',
 				required: true,
 			},
 		],
