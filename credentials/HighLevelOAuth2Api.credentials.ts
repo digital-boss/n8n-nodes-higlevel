@@ -1,12 +1,10 @@
-import {
-	IAuthenticateGeneric,
-	ICredentialTestRequest,
-	ICredentialType,
-	INodeProperties,
-} from 'n8n-workflow';
+import type { ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class HighLevelOAuth2Api implements ICredentialType {
 	name = 'highLevelOAuth2Api';
+
+	extends = ['oAuth2Api'];
+
 	displayName = 'HighLevel OAuth2 API';
 	documentationUrl = 'https://highlevel.stoplight.io/';
 
@@ -61,25 +59,4 @@ export class HighLevelOAuth2Api implements ICredentialType {
 			default: 'body',
 		},
 	];
-
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				Authorization: '=Bearer {{$credentials.accessToken}}',
-			},
-		},
-	};
-
-	test: ICredentialTestRequest = {
-		request: {
-				method: 'GET',
-				baseURL: '={{ $credentials.baseUrl }}',
-				url: '/v1/templates',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-				},
-		},
-};
 }
