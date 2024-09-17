@@ -3,7 +3,7 @@ import { contactFields, contactNotes, contactOperations } from './description/Co
 import { opportunityFields, opportunityOperations } from './description/OpportunityDescription';
 import { taskFields, taskOperations } from './description/TaskDescription';
 import { calendarFields, calendarOperations } from './description/CalendarDescription'
-import { getContacts, getPipelines, getPipelineStages, getTimezones, getUsers } from './GenericFunctions';
+import { getContacts, getPipelines, getPipelineStages, getTimezones, getUsers, highLevelApiPagination } from './GenericFunctions';
 
 export class HighLevel implements INodeType {
 	description: INodeTypeDescription = {
@@ -26,12 +26,15 @@ export class HighLevel implements INodeType {
 			},
 		],
 		requestDefaults: {
-			baseURL: '={{ $credentials.baseUrl }}',
+			baseURL: 'http://services.leadconnectorhq.com',
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
 				Version: '2021-07-28',
 			},
+		},
+		requestOperations: {
+			pagination: highLevelApiPagination,
 		},
 		properties: [
 			{
