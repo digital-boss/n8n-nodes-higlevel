@@ -2,7 +2,7 @@ import { INodeType, INodeTypeDescription } from 'n8n-workflow';
 import { contactFields, contactNotes, contactOperations } from './description/ContactDescription';
 import { opportunityFields, opportunityOperations } from './description/OpportunityDescription';
 import { taskFields, taskOperations } from './description/TaskDescription';
-import { calendarFields, calendarOperations } from './description/CalendarDescription';
+import { calendarFields, calendarOperations } from './description/CalendarDescription'
 import { getContacts, getPipelines, getPipelineStages, getTimezones, getUsers } from './GenericFunctions';
 
 export class HighLevel implements INodeType {
@@ -21,7 +21,7 @@ export class HighLevel implements INodeType {
 		outputs: ['main'],
 		credentials: [
 			{
-				name: 'highLevelOAuth2Api',
+				name: 'highLevelApi',
 				required: true,
 			},
 		],
