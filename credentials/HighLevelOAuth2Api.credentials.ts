@@ -71,12 +71,32 @@ export class HighLevelOAuth2Api implements ICredentialType {
 			type: 'hidden',
 			default: 'body',
 		},
+		{
+			displayName: 'OAuth Redirect URL',
+			name: 'redirectUrl',
+			type: 'string',
+			default: '',
+			description: 'The URL where the authorization response will be sent.',
+			//@ts-ignore
+			readOnly: true,
+			displayOptions: {
+				show: {
+					grantType: ['authorizationCode'],
+				},
+			},
+		},
 	];
 
-	// Add a method to dynamically generate the redirect URL
 	getRedirectUrl(): string {
-		// @ts-ignore
+		//@ts-ignore
 		const baseUrl = process.env.N8N_BASE_URL || 'http://localhost:5678';
 		return `${baseUrl}/rest/oauth2-credential/callback`;
+	}
+
+	async getCredentials(): Promise<{ [key: string]: any }> {
+		const redirectUrl = this.getRedirectUrl();
+		return {
+			redirectUrl,
+		};
 	}
 }
