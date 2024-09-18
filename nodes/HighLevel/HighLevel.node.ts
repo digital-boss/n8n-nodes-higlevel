@@ -1,11 +1,47 @@
-import { INodeType, INodeTypeDescription } from 'n8n-workflow';
+import type {
+	INodeProperties,
+	INodeType,
+	INodeTypeDescription,
+} from 'n8n-workflow';
+
 import { contactFields, contactNotes, contactOperations } from './description/ContactDescription';
 import { opportunityFields, opportunityOperations } from './description/OpportunityDescription';
 import { taskFields, taskOperations } from './description/TaskDescription';
-import { calendarFields, calendarOperations } from './description/CalendarDescription'
-import { getContacts, getPipelines, getPipelineStages, getTimezones, getUsers, highLevelApiPagination } from './GenericFunctions';
+import {
+	getContacts,
+	getPipelines,
+	getPipelineStages,
+	getTimezones,
+	getUsers,
+	highLevelApiPagination,
+} from './GenericFunctions';
 
-export class HighLevel implements INodeType {
+const resources: INodeProperties[] = [
+	{
+		displayName: 'Resource',
+		name: 'resource',
+		type: 'options',
+		noDataExpression: true,
+		options: [
+			{
+				name: 'Contact',
+				value: 'contact',
+			},
+			{
+				name: 'Opportunity',
+				value: 'opportunity',
+			},
+			{
+				name: 'Task',
+				value: 'task',
+			},
+		],
+		default: 'contact',
+		required: true,
+	},
+];
+
+export class HighLevel implements INodeType{
 	description: INodeTypeDescription = {
 		displayName: 'HighLevel',
 		name: 'highLevel',
@@ -26,7 +62,7 @@ export class HighLevel implements INodeType {
 			},
 		],
 		requestDefaults: {
-			baseURL: 'http://services.leadconnectorhq.com',
+			baseURL: 'https://services.leadconnectorhq.com',
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
@@ -37,20 +73,7 @@ export class HighLevel implements INodeType {
 			pagination: highLevelApiPagination,
 		},
 		properties: [
-			{
-				displayName: 'Resource',
-				name: 'resource',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{ name: 'Contact', value: 'contact' },
-					{ name: 'Opportunity', value: 'opportunity' },
-					{ name: 'Task', value: 'task' },
-					{ name: 'Calendar', value: 'calendar' },
-				],
-				default: 'contact',
-				required: true,
-			},
+			...resources,
 			...contactOperations,
 			...contactNotes,
 			...contactFields,
@@ -58,18 +81,17 @@ export class HighLevel implements INodeType {
 			...opportunityFields,
 			...taskOperations,
 			...taskFields,
-			...calendarOperations,
-			...calendarFields,
 		],
 	};
 
 	methods = {
 		loadOptions: {
-			getContacts,
 			getPipelines,
+			getContacts,
 			getPipelineStages,
 			getUsers,
 			getTimezones,
 		},
 	};
 }
+
