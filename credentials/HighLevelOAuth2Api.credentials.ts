@@ -2,7 +2,7 @@ import type { ICredentialType, INodeProperties, IAuthenticateGeneric, ICredentia
 
 export class HighLevelOAuth2Api implements ICredentialType {
 	name = 'highLevelOAuth2Api';
-	extends = ['oAuth2Api'];
+	//extends = ['oAuth2Api'];
 	displayName = 'HighLevel OAuth2 API';
 	documentationUrl = 'https://highlevel.stoplight.io/';
 	icon: Icon = 'file:icons/highLevel.svg';
