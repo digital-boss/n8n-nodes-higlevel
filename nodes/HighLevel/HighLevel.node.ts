@@ -7,6 +7,7 @@ import type {
 import { contactFields, contactNotes, contactOperations } from './description/ContactDescription';
 import { opportunityFields, opportunityOperations } from './description/OpportunityDescription';
 import { taskFields, taskOperations } from './description/TaskDescription';
+import { calendarFields, calendarOperations } from './description/CalendarDescription';
 import {
 	getContacts,
 	getPipelines,
@@ -34,6 +35,10 @@ const resources: INodeProperties[] = [
 			{
 				name: 'Task',
 				value: 'task',
+			},
+			{
+				name: 'Calendar',
+				value: 'calendar',
 			},
 		],
 		default: 'contact',
@@ -81,6 +86,8 @@ export class HighLevel implements INodeType{
 			...opportunityFields,
 			...taskOperations,
 			...taskFields,
+			...calendarOperations,
+			...calendarFields,
 		],
 	};
 

@@ -5,7 +5,7 @@ export class HighLevelOAuth2Api implements ICredentialType {
 	extends = ['oAuth2Api'];
 	displayName = 'HighLevel OAuth2 API';
 	documentationUrl = 'https://highlevel.stoplight.io/';
-	icon: Icon = 'file:icons/highLevel.svg';
+	icon: Icon = 'file:../nodes/HighLevel/highLevel.svg';
 
 	properties: INodeProperties[] = [
 		{
@@ -35,7 +35,7 @@ export class HighLevelOAuth2Api implements ICredentialType {
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'string',
-			hint: 'Separate scopes by space, if needed.',
+			hint: "Separate scopes by space, scopes needed for node: 'locations.readonly contacts.readonly contacts.write opportunities.readonly opportunities.write users.readonly'",
 			default: '',
 			required: true,
 		},
