@@ -48,7 +48,7 @@ const resources: INodeProperties[] = [
 
 export class HighLevel implements INodeType{
 	description: INodeTypeDescription = {
-		displayName: 'HighLevel',
+		displayName: 'HighLevelPro',
 		name: 'highLevel',
 		icon: 'file:highLevel.svg',
 		group: ['transform'],
@@ -56,7 +56,7 @@ export class HighLevel implements INodeType{
 		description: 'Consume HighLevel API',
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		defaults: {
-			name: 'HighLevel',
+			name: 'HighLevelPro',
 		},
 		inputs: ['main'],
 		outputs: ['main'],
