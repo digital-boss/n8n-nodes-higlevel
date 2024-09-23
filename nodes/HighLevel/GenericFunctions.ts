@@ -158,6 +158,24 @@ export async function addLocationIdPreSendAction(
 	return requestOptions;
 }
 
+export const addNotePostReceiveAction = async function (
+  this: IExecuteSingleFunctions,
+  items: INodeExecutionData[],
+  response: IN8nHttpFullResponse
+): Promise<INodeExecutionData[]> {
+
+  const note = this.getNodeParameter('additionalFields.notes', 0);
+
+  // Only proceed if a note is provided
+  if (note) {
+    items.forEach((item) => {
+      item.json.note = note;
+    });
+  }
+  return items;
+};
+
+
 export async function highLevelApiRequest(
 	this:
 		| IExecuteFunctions

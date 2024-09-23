@@ -1,6 +1,7 @@
 import type { INodeProperties } from 'n8n-workflow';
 import {
 	addLocationIdPreSendAction,
+	addNotePostReceiveAction,
 	splitTagsPreSendAction,
 	validEmailAndPhonePreSendAction,
 } from '../GenericFunctions';
@@ -40,6 +41,7 @@ export const contactOperations: INodeProperties[] = [
 									property: 'contact',
 								},
 							},
+							addNotePostReceiveAction,
 						],
 					},
 				},
@@ -227,7 +229,7 @@ const createProperties: INodeProperties[] = [
 		displayName: 'Location ID',
 		name: 'locationId',
 		type: 'string',
-		required: true,
+		description: 'Required to access custom fields and set timezones for appointments',
 		displayOptions: {
 			show: {
 				resource: ['contact'],
@@ -410,19 +412,12 @@ const createProperties: INodeProperties[] = [
 					},
 				},
 			},
-			//TODO not supported
-			// {
-			// 	displayName: 'Note',
-			// 	name: 'notes',
-			// 	type: 'string',
-			// 	default: '',
-			// 	routing: {
-			// 		send: {
-			// 			type: 'body',
-			// 			property: 'notes',
-			// 		},
-			// 	},
-			// },
+			{
+				displayName: 'Note',
+				name: 'notes',
+				type: 'string',
+				default: '',
+			},
 			{
 				displayName: 'Tags',
 				name: 'tags',
