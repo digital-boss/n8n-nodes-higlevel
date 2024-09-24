@@ -14,7 +14,7 @@ import type {
 	IPollFunctions,
 	IWebhookFunctions,
 } from 'n8n-workflow';
-import { ApplicationError, NodeApiError } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
 //@ts-ignore
 import type { ToISOTimeOptions } from 'luxon';
 //@ts-ignore
@@ -159,22 +159,83 @@ export async function addLocationIdPreSendAction(
 }
 
 export const addNotePostReceiveAction = async function (
-  this: IExecuteSingleFunctions,
-  items: INodeExecutionData[],
-  response: IN8nHttpFullResponse
+	this: IExecuteSingleFunctions,
+	items: INodeExecutionData[],
+	response: IN8nHttpFullResponse
 ): Promise<INodeExecutionData[]> {
+	//@ts-ignore
+	console.log('API Response:', JSON.stringify(response, null, 2));
 
-  const note = this.getNodeParameter('additionalFields.notes', 0);
+	// Get the note body from parameters
+	const noteBody = this.getNodeParameter('additionalFields.notes', 0) as string;
 
-  // Only proceed if a note is provided
-  if (note) {
-    items.forEach((item) => {
-      item.json.note = note;
-    });
-  }
-  return items;
+	// Check if contactId is in the response
+	const contactId = response.body?.id || response.body?.contact?.id;
+
+	if (!contactId) {
+			throw new Error('Contact ID not found in the response.');
+	}
+
+	// Get users to retrieve userId
+	let userId: string | undefined;
+	try {
+			const users = await getUsers.call(this as unknown as ILoadOptionsFunctions);
+			if (users.length > 0) {
+					userId = String(users[0].value); // Ensure userId is a string
+			} else {
+					throw new Error('No users found.');
+			}
+	} catch (error) {
+			//@ts-ignore
+			console.error('Failed to retrieve users:', error);
+			throw new Error(`Failed to retrieve users: ${error.message}`);
+	}
+
+	// Proceed only if a note body is provided
+	if (noteBody && userId) {
+			try {
+					// Prepare data for the note API request
+					const noteData = {
+							body: noteBody,  // Content of the note
+							userId: userId,  // ID of the user adding the note
+					};
+
+					// Make the POST request to add a note to the contact
+					const noteResponse = await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							'highLevelOAuth2Api',
+							{
+									method: 'POST',
+									url: `https://services.leadconnectorhq.com/contacts/${contactId}/notes`,
+									headers: {
+											Accept: 'application/json',
+											'Content-Type': 'application/json',
+											Version: '2021-07-28',
+									},
+									body: noteData,
+									json: true,
+							}
+					);
+
+					//@ts-ignore
+					console.log('Note API Response:', JSON.stringify(noteResponse, null, 2));
+
+					// Optionally add the response to the item for further processing or logging
+					items.forEach((item) => {
+							item.json.noteResponse = noteResponse;
+					});
+			} catch (error) {
+					//@ts-ignore
+					console.error(`Failed to add note to contact ${contactId}:`, error);
+					throw new Error(`Failed to add note to contact ${contactId}: ${error.message}`);
+			}
+	} else {
+			//@ts-ignore
+			console.log('No note provided or user ID not found.');
+	}
+
+	return items;
 };
-
 
 export async function highLevelApiRequest(
 	this:
@@ -364,27 +425,3 @@ export async function getUsers(this: ILoadOptionsFunctions): Promise<INodeProper
 	return options;
 }
 
-export async function getTimezones(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	try {
-		const locationId = this.getCurrentNodeParameter('locationId') as string;
-		if (!locationId) {
-			throw new ApplicationError('Location ID is not available.');
-		}
-		const responseData = await highLevelApiRequest.call(
-			this,
-			'GET',
-			`/locations/${locationId}/timezones`,
-			undefined,
-		);
-		const timezones = responseData?.timeZones ?? [];
-		if (timezones.length === 0) {
-			throw new ApplicationError('No timezones available.');
-		}
-		return timezones.map((zone: string) => ({
-			name: zone.trim(),
-			value: zone.trim(),
-		})) as INodePropertyOptions[];
-	} catch (error) {
-		throw new ApplicationError('Error fetching timezones from HighLevel API.');
-	}
-}

@@ -1,4 +1,8 @@
 import type {
+	IDataObject,
+	ILoadOptionsFunctions,
+	INodeListSearchItems,
+	INodeListSearchResult,
 	INodeProperties,
 	INodeType,
 	INodeTypeDescription,
@@ -12,7 +16,6 @@ import {
 	getContacts,
 	getPipelines,
 	getPipelineStages,
-	getTimezones,
 	getUsers,
 	highLevelApiPagination,
 } from './GenericFunctions';
@@ -97,7 +100,80 @@ export class HighLevel implements INodeType{
 			getContacts,
 			getPipelineStages,
 			getUsers,
-			getTimezones,
+		},
+		listSearch: {
+			async searchCustomFields(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				const { locationId } =
+				((await this.getCredentials('highLevelOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
+
+				const responseData: IDataObject = await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'highLevelOAuth2Api',
+					{
+						url: `https://services.leadconnectorhq.com/locations/${locationId}/customFields?model=contact`,
+						headers: {
+							Accept: 'application/json',
+							'Content-Type': 'application/json',
+							Version: '2021-07-28',
+						},
+					}
+				) as IDataObject;
+
+				const customFields = responseData.customFields as Array<{ name: string , id: string}>;
+
+				const results: INodeListSearchItems[] = customFields
+					.map((a) => ({
+						name: a.name,
+						value: a.id,
+					}))
+					.filter((a) => !filter || a.name.toLowerCase().includes(filter.toLowerCase()))
+					.sort((a, b) => {
+						if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+						if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+						return 0;
+					});
+
+				return { results };
+			},
+			async searchTimezones(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				const { locationId } =
+				((await this.getCredentials('highLevelOAuth2Api'))?.oauthTokenData as IDataObject) ?? {};
+
+				const responseData: IDataObject = await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'highLevelOAuth2Api',
+					{
+						url: `https://services.leadconnectorhq.com/locations/${locationId}/timezones`,
+						headers: {
+							Accept: 'application/json',
+							'Content-Type': 'application/json',
+							Version: '2021-07-28',
+						},
+					},
+				) as IDataObject;
+
+				const timezones = responseData.timeZones as Array<string>;
+
+				const results: INodeListSearchItems[] = timezones
+					.map((zone) => ({
+						name: zone.trim(),
+						value: zone.trim(),
+					}))
+					.filter((zone) => !filter || zone.name.toLowerCase().includes(filter.toLowerCase()))
+					.sort((a, b) => {
+						if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+						if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+						return 0;
+					});
+
+				return { results };
+			},
 		},
 	};
 }
