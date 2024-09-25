@@ -1,5 +1,6 @@
 import type { INodeProperties } from 'n8n-workflow';
 import {
+	addCustomFieldsPreSendAction,
 	addLocationIdPreSendAction,
 	addNotePostReceiveAction,
 	splitTagsPreSendAction,
@@ -31,6 +32,7 @@ export const contactOperations: INodeProperties[] = [
 							validEmailAndPhonePreSendAction,
 							splitTagsPreSendAction,
 							addLocationIdPreSendAction,
+							addCustomFieldsPreSendAction,
 						],
 					},
 					output: {
@@ -156,55 +158,60 @@ const customFields: INodeProperties = {
 	type: 'fixedCollection',
 	default: {},
 	typeOptions: {
-		multipleValues: true,
+			multipleValues: true,
 	},
 	options: [
-		{
-			name: 'values',
-			displayName: 'Value',
-			values: [
-				{
-					displayName: 'Field Name or ID',
-					name: 'fieldId',
-					required: true,
-					type: 'resourceLocator',
-					default: '',
-					description: 'Choose from the list, or specify an ID using an expression',
-					modes: [
-						{
-							displayName: 'List',
-							name: 'list',
-							type: 'list',
-							typeOptions: {
-								searchListMethod: 'searchCustomFields',
-								searchable: true,
+			{
+					name: 'values',
+					displayName: 'Value',
+					values: [
+							{
+									displayName: 'Field Name or ID',
+									name: 'fieldId',
+									required: true,
+									type: 'resourceLocator',
+									default: '',
+									description: 'Choose from the list, or specify an ID using an expression',
+									modes: [
+											{
+													displayName: 'List',
+													name: 'list',
+													type: 'list',
+													typeOptions: {
+															searchListMethod: 'searchCustomFields',
+															searchable: true,
+													},
+											},
+											{
+													displayName: 'ID',
+													name: 'id',
+													type: 'string',
+													placeholder: 'Enter Custom Field ID',
+											},
+									],
 							},
-						},
-						{
-							displayName: 'ID',
-							name: 'id',
-							type: 'string',
-							placeholder: 'Enter Custom Field ID',
-						},
+							{
+									displayName: 'Field Value',
+									name: 'fieldValue',
+									type: 'string',
+									default: '',
+									routing: {
+											send: {
+													type: 'body',
+													property: 'customFields',
+													value: '={{ $parent.values.map(field => ({ fieldId: { id: field.fieldId.id }, field_value: field.fieldValue })) }}',
+											},
+									},
+							},
 					],
-				},
-				{
-					displayName: 'Field Value',
-					name: 'fieldValue',
-					type: 'string',
-					default: '',
-					routing: {
-						send: {
-							// Send the value as customField with the fieldId as the key
-							value: '={{$value}}',
-							property: '={{`customField.${$parent.fieldId}`}}',
-							type: 'body',
-						},
-					},
-				},
-			],
-		},
+			},
 	],
+	routing: {
+			send: {
+					type: 'body',
+					property: 'customFields',
+			}
+	}
 };
 
 const createProperties: INodeProperties[] = [
