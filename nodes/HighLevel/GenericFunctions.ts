@@ -367,35 +367,25 @@ export async function addCustomFieldsPreSendAction(
 	this: IExecuteSingleFunctions,
 	requestOptions: IHttpRequestOptions,
 ): Promise<IHttpRequestOptions> {
-	const customFields = this.getNodeParameter('customFields.values', null) as IDataObject[];
+    const rawCustomFields = requestOptions.body.customFields;
 
-	if (customFields) {
-			// Transform the values into the required format
-			const formattedCustomFields = customFields.map((field) => {
-					const fieldId = field.fieldId;
+    // Check if rawCustomFields is present and has values
+    if (rawCustomFields && Array.isArray(rawCustomFields.values) && rawCustomFields.values.length > 0) {
+        // Transform the values into the required format
+        const formattedCustomFields = rawCustomFields.values.map((field: { fieldId: any; fieldValue: any; }) => {
+            const fieldId = field.fieldId;
 
-					// Ensure fieldId is an object and has a 'value' property
-					if (typeof fieldId === 'object' && fieldId !== null && 'value' in fieldId) {
-							return {
-									id: fieldId.value,
-									key: fieldId.cachedResultName || 'default_key',
-									field_value: field.fieldValue,
-							};
-					} else {
-							throw new Error(`Invalid fieldId format: ${JSON.stringify(fieldId)}`);
-					}
-			});
-
-			// Set the customFields directly as an array
-			requestOptions.body = requestOptions.body || {};
-			requestOptions.body.customFields = formattedCustomFields;
-	}
-
-	//@ts-ignore
-	console.log('Formatted Custom Fields:', requestOptions.body.customFields);
-	return requestOptions;
+            if (typeof fieldId === 'object' && fieldId !== null && 'value' in fieldId) {
+                return {
+                    id: fieldId.value,
+                    key: fieldId.cachedResultName || 'default_key',
+                    field_value: field.fieldValue,
+                };
+            } else {
+                throw new Error(`Invalid fieldId format: ${JSON.stringify(fieldId)}`);
+            }
+        });
+        requestOptions.body.customFields = formattedCustomFields;
+    }
+    return requestOptions;
 }
-
-
-
-
