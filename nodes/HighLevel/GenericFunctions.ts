@@ -164,14 +164,45 @@ export const addNotePostReceiveAction = async function (
   response: IN8nHttpFullResponse
 ): Promise<INodeExecutionData[]> {
 
-  const note = this.getNodeParameter('additionalFields.notes', 0);
+  const note = this.getNodeParameter('additionalFields.notes', 0) as string;
 
-  // Only proceed if a note is provided
-  if (note) {
-    items.forEach((item) => {
-      item.json.note = note;
-    });
+  // If no note is provided, do nothing and return the items as they are
+  if (!note) {
+    return items;
   }
+
+  // Ensure there is a valid response and extract contactId and userId
+  if (!response || !response.body || !response.body.contact) {
+    throw new Error('No response data available to extract contact ID and user ID.');
+  }
+
+  const contactId = response.body.contact.id;
+  const userId = response.body.contact.locationId;
+  const requestBody = {
+    userId,
+    body: note,
+  };
+
+	const responseData = await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'highLevelOAuth2Api',  // Ensure the correct credentials are used
+		{
+			method: 'POST',
+			url: `https://services.leadconnectorhq.com/contacts/${contactId}/notes`,
+			body: requestBody,
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+				Version: '2021-07-28',
+			},
+			json: true,
+		}
+	);
+
+  //@ts-ignore
+  console.log('Note creation response:', responseData);
+
+  // Return the original items after adding the note
   return items;
 };
 
